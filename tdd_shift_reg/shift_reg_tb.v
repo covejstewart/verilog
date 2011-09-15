@@ -1,4 +1,4 @@
-//tb_shift_reg.v - test bench for shift_reg
+//shift_reg_tb.v - test bench for shift_reg
 
 module shift_reg_tb;
 reg clock;
@@ -38,7 +38,24 @@ initial begin
 end
 
 task test_data_shifts_to_zero;
-   
+   input [7:0] test_val;
+   begin
+      dut_reset();
+      dut_load_data(test_val);
+      @(posedge clock);
+      @(posedge clock);
+      @(posedge clock);
+      @(posedge clock);
+      @(posedge clock);
+      @(posedge clock);
+      @(posedge clock);
+      @(posedge clock);
+      if(dut_data_out != 8'h00) begin
+         $display("Test Failed: test_data_shifts_to_zero() -%g",$time);
+         $finish;
+      end
+   end
+endtask
 
 task test_data_shifts_right;
    input [7:0] test_val;

@@ -1,4 +1,4 @@
-//shift_reg.v - Basic shift register 
+//shift_reg.v - The most Basic shift register.  Only shifts right, synchronous loading.
 
 module shift_reg (clock, reset, load, d_in, d_out);
    input clock;
