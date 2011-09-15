@@ -1,41 +1,28 @@
 //shift_reg.v - Basic shift register 
 
-module shift_reg (clock, reset, status);
+module shift_reg (clock, reset, load, d_in, d_out);
    input clock;
    input reset;
+   input load;
+   input [7:0] d_in;
+   output [7:0] d_out;
 
-   output status;
-   reg status;
+   reg [7:0] d_out;
 
    always @ (posedge clock)
    begin
       if (reset) begin
-         status <= 1;
+         d_out <= 8'h00;
       end
       else begin
-         status <= 1;
+         if (load) begin
+            d_out <= d_in;
+         end
+         else begin
+            d_out <= (d_out >> 1);
+         end
       end
    end
 endmodule
 
-/*
-module counter(out, clk, reset);
 
-  parameter WIDTH = 8;
-
-  output [WIDTH-1 : 0] out;
-  input 	       clk, reset;
-
-  reg [WIDTH-1 : 0]   out;
-  wire 	       clk, reset;
-
-  always @(posedge clk)
-    out <= out + 1;
-
-  always @reset
-    if (reset)
-      assign out = 0;
-    else
-      deassign out;
-
-endmodule*/
