@@ -1,37 +1,41 @@
 //tb_shift_reg.v - test bench for shift_reg
 
-module tb_shift_reg;
-   reg clock;
-   reg reset;
-   reg status;
+module shift_reg_tb;
+reg clock;
+reg reset;
 
-   integer errors;
+wire status;
 
-   shift_reg dut(
-            .clock(clock), 
-            .reset(reset), 
-            .status(status));
+integer errors;
 
-   task status_is_zero_on_reset;
-      
-      @(posedge clk);   
-      reset <= 1;
-      @(posedge clk);
-      if status != 0 begin
-         $display("%g Error: status_is_zero_on_reset()",$time);
+shift_reg dut(
+         .clock(clock), 
+         .reset(reset), 
+         .status(status));
+
+//setup a free running clock
+initial begin
+   clock = 0;   
+   forever #50 clock = ~clock;
+end
+
+//Execute the tests here
+initial begin
+   reset = 0;
+   #1 status_is_zero_on_reset();
+   #100 $finish;
+end
+
+task status_is_zero_on_reset;
+   begin
+      @(posedge clock);   
+      reset = 1;
+      @(posedge clock);
+      if (status != 0) begin
+         $display("%g Test Failed: status_is_zero_on_reset()",$time);
+         $finish;
       end
-   endtask
-
-   //setup a free running clock
-   inital begin
-      clock = 0;   
-      forever #50 clock = ~clock;
    end
-
-   //Execute the tests here
-   initial begin
-      #50;
-      status_is_zero_on_reset();
-   end
+endtask
 endmodule
 

@@ -1,4 +1,4 @@
-/*shift_reg.v - Basic shift register 
+//shift_reg.v - Basic shift register 
 
 module shift_reg (clock, reset, status);
    input clock;
@@ -9,11 +9,16 @@ module shift_reg (clock, reset, status);
 
    always @ (posedge clock)
    begin
-      status <= 1;
+      if (reset) begin
+         status <= 1;
+      end
+      else begin
+         status <= 1;
+      end
    end
 endmodule
-*/
 
+/*
 module counter(out, clk, reset);
 
   parameter WIDTH = 8;
@@ -33,4 +38,4 @@ module counter(out, clk, reset);
     else
       deassign out;
 
-endmodule
+endmodule*/
