@@ -1,0 +1,10 @@
+Bowling Kata
+http://codingdojo.org/cgi-bin/wiki.pl?KataBowling
+
+This is adopted from a java coding example, and I am assuming that the DUT module be written in synthesizable RTL, so all checking will be in the TestBench
+
+Some key points about the Kata. . .
+
+We will not check for valid rolls.
+We will not check for correct number of rolls and frames.
+We will not provide scores for intermediate frames.
