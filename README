@@ -1,0 +1,8 @@
+Using Icarus Verilog to compile & simulate
+
+Compile >$iverilog -o test tb_shift_reg.v shift_reg.v && vvp test
+Run     >$vvp test
+
+To get Icarus Verilog:
+
+sudo apt-get install verilog
