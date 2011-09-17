@@ -22,7 +22,6 @@ initial begin
 end
 
 initial begin
-   $monitor("%g:reset-%b,roll-%b,calc-%b,pins-%d,score-%d",$time,reset,roll,calculate_score, pin_count,dut_score);
    reset = 0;
    roll = 0;
    pin_count = 0;

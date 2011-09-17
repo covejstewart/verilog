@@ -7,5 +7,11 @@ To get Icarus Verilog:
 
 sudo apt-get install verilog
 
+Also should get gtkwave
+
+sudo apt-get install gtkwave
+
+
+
 http://iverilog.wikia.com/wiki/Installation_Guide
 
