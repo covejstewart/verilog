@@ -17,6 +17,11 @@ bowling dut(
       .score(dut_score));
 
 initial begin
+   $dumpfile("test.vcd");
+   $dumpvars(0,bowling_tb);
+end
+
+initial begin
       clock = 0;
       forever #50 clock = ~clock;
 end
@@ -26,7 +31,6 @@ initial begin
    roll = 0;
    pin_count = 0;
    calculate_score = 0;
-   #1 test_outputs_are_zero_on_reset();
    #1 test_score_single_throw();
    #1 test_score_single_spare();
    #1 test_score_single_strike();
@@ -89,17 +93,6 @@ task test_score_single_throw;
    end
 endtask
       
-task test_outputs_are_zero_on_reset;
-   begin
-      dut_reset();
-      get_score();
-      if(dut_score != 0) begin
-         $display("\nTest Failed: test_outputs_are_zero_on_reset\n");
-         $finish;
-      end
-   end
-endtask
-
 task get_score;
    integer x;   
    begin
