@@ -23,6 +23,12 @@ initial begin
    forever #50 clock = ~clock;
 end
 
+initial begin
+   $dumpfile("test.vcd");
+   $dumpvars(0,shift_reg_tb);
+end
+
+
 //Execute the tests here
 initial begin
 //   $monitor("%g,din=%h,dout=%h,reset=%b,load=%b",$time,data_in,dut_data_out,reset,load);
@@ -42,14 +48,14 @@ task test_data_shifts_to_zero;
    begin
       dut_reset();
       dut_load_data(test_val);
-      @(posedge clock);
-      @(posedge clock);
-      @(posedge clock);
-      @(posedge clock);
-      @(posedge clock);
-      @(posedge clock);
-      @(posedge clock);
-      @(posedge clock);
+      @(negedge clock);
+      @(negedge clock);
+      @(negedge clock);
+      @(negedge clock);
+      @(negedge clock);
+      @(negedge clock);
+      @(negedge clock);
+      @(negedge clock);
       if(dut_data_out != 8'h00) begin
          $display("Test Failed: test_data_shifts_to_zero() -%g",$time);
          $finish;
@@ -62,7 +68,7 @@ task test_data_shifts_right;
    begin
       dut_reset();
       dut_load_data(test_val);
-      @(posedge clock);
+      @(negedge clock);
       if(dut_data_out != test_val>>1) begin
          $display("Test Failed: test_data_shifts_right() -%g",$time);
          $finish;
@@ -85,7 +91,7 @@ endtask
 task test_data_is_zero_on_reset;
    begin
       dut_reset();
-      @(posedge clock);
+      @(negedge clock);
       if (dut_data_out != 8'h00) begin
          $display("Test Failed: test_data_is_zero_on_reset()");
          $finish;
@@ -98,20 +104,19 @@ task dut_load_data;
    begin
       data_in = value_to_load;
       load = 0;
-      @(posedge clock);
+      @(negedge clock);
       load = 1;
-      @(posedge clock);
+      @(negedge clock);
       load = 0;
-      @(posedge clock);
    end
 endtask
 
 task dut_reset;
    begin
       reset = 0;
-      @(posedge clock);   
+      @(negedge clock);   
       reset = 1;
-      @(posedge clock);
+      @(negedge clock);
       reset = 0;
    end
 endtask
