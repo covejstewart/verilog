@@ -11,14 +11,21 @@ inout SCL;
 
 reg SDA_out;
 reg SCL_out;
-
+reg [7:0] data_from_dut;
 reg ack_from_dut;
+
+parameter [6:0] dut_address = 7'h56;
+parameter [7:0] dut_buffer_init = 8'hA5;
+parameter WRITE = 1'b0, READ = 1'b1;
 
 i2c_slave dut(
          .clock(dut_clock),
          .reset(reset),
          .SDA(SDA),
          .SCL(SCL));
+
+defparam dut.my_address = dut_address;
+defparam dut.data_buffer_init = dut_buffer_init;
 
 pullup(SDA);
 pullup(SCL);
@@ -45,24 +52,70 @@ initial begin
    reset_dut();
    #1 test_lines_idle_high();
    #1 test_ack_on_address();
-   #1 test_read_byte();
+   #1 test_read_single_byte();
+   #1 test_read_multiple_bytes();
+//   #1 test_write_single_byte();
    #50 $finish;
 end   
-   
-task test_read_byte;
+
+task test_write_single_byte;
 begin
    reset_dut();
    send_start();
-   send_address_and_mode({7'h56,1'b1});   
+   send_address_and_mode({dut_address, WRITE});
    get_ack();
+//   send_data_byte();
+   get_ack();
+   if(data_from_dut != dut_buffer_init) begin
+      $display("Test Failed: read_multiple_bytes()-%g", $time);
+      $finish;
+   end
+end
+endtask
+
+task test_read_multiple_bytes;
+integer idx;
+begin
+   data_from_dut = 0;
+   reset_dut();
+   send_start();
+   send_address_and_mode({dut_address, READ});   
+   get_ack();
+   get_data_byte();
+   if(data_from_dut != dut_buffer_init) begin
+      $display("Test Failed: read_multiple_bytes()-%g", $time);
+      $finish;
+   end
+   send_ack();
+   get_data_byte();
+   if(data_from_dut != dut_buffer_init) begin
+      $display("Test Failed: read_multiple_bytes()-%g", $time);
+      $finish;
+   end
+   
+end
+endtask
+
+task test_read_single_byte;
+begin
+   data_from_dut = 0;
+   reset_dut();
+   send_start();
+   send_address_and_mode({dut_address, READ});   
+   get_ack();
+   get_data_byte();
+   if(data_from_dut != dut_buffer_init) begin
+      $display("Test Failed: read_single_byte()-%g", $time);
+      $finish;
+   end
 end
 endtask   
-   
+
 task test_ack_on_address;
 begin
    reset_dut();
    send_start();
-   send_address_and_mode({7'h56,1'b0});
+   send_address_and_mode({dut_address, WRITE});
    get_ack();
    if(ack_from_dut != 0) begin
       $display("Test Failed: ack_on_address()-%g", $time);
@@ -78,6 +131,32 @@ begin
       $display("Test Failed: lines_idle_high() -%g",$time);
       $finish;
    end
+end
+endtask
+
+task get_data_byte;
+integer idx;
+begin
+   data_from_dut = 0;
+   for(idx=0;idx<8;idx=idx+1) begin
+      @(posedge clock);
+      SCL_out = 1;
+      @(negedge clock);
+      SCL_out = 0;
+      data_from_dut = data_from_dut << 1;
+      data_from_dut[0] = SDA;
+   end
+end
+endtask
+
+task send_ack;
+begin
+   SDA_out = 0;
+   @(posedge clock);
+   SCL_out = 1;
+   @(negedge clock);
+   SCL_out = 0;
+   SDA_out = 1;
 end
 endtask
 
@@ -112,8 +191,7 @@ begin
    end   
 end
 endtask
-
-   
+ 
 task send_bit;
 input bit_to_send;
 begin
@@ -129,9 +207,8 @@ task reset_dut;
 begin
    SDA_out = 1;
    SCL_out = 1;
-   reset = 0;
-   @(posedge clock);
    reset = 1;
+   @(posedge clock);
    @(posedge clock);
    reset = 0;
 end
