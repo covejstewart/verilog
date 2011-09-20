@@ -1,0 +1,4 @@
+Decoder for a rotary encoder with a quadrature output.
+
+-determine direction (clockwise or counter-clockwise)
+-determine angular velocity (omega)
