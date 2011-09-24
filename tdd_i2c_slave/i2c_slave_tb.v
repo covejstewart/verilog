@@ -16,6 +16,7 @@ reg ack_from_dut;
 
 parameter [6:0] dut_address = 7'h56;
 parameter [7:0] dut_buffer_init = 8'hA5;
+parameter [7:0] data_to_send = 8'h37;
 parameter WRITE = 1'b0, READ = 1'b1;
 
 i2c_slave dut(
@@ -53,10 +54,35 @@ initial begin
    #1 test_lines_idle_high();
    #1 test_ack_on_address();
    #1 test_read_single_byte();
-   #1 test_read_multiple_bytes();
-//   #1 test_write_single_byte();
+   #1 test_write_single_byte();
+   #1 test_write_stop_read_byte();   
    #50 $finish;
 end   
+
+task test_write_stop_read_byte;
+begin
+   reset_dut();
+   send_start();
+   send_address_and_mode({dut_address, WRITE});
+   get_ack();
+   send_data_byte(data_to_send);
+   get_ack();
+   if(ack_from_dut != 0) begin
+      $display("Test Failed: write_read_byte-ack()-%g", $time);
+      $finish;
+   end
+   send_stop();
+   send_start();
+   send_address_and_mode({dut_address, READ});   
+   get_ack();
+   get_data_byte();
+   if(data_from_dut != dut_buffer_init) begin
+      $display("Test Failed: write_stop_read_byte-data()-%g", $time);
+      $finish;
+   end   
+end
+endtask
+
 
 task test_write_single_byte;
 begin
@@ -64,35 +90,12 @@ begin
    send_start();
    send_address_and_mode({dut_address, WRITE});
    get_ack();
-//   send_data_byte();
+   send_data_byte(data_to_send);
    get_ack();
-   if(data_from_dut != dut_buffer_init) begin
-      $display("Test Failed: read_multiple_bytes()-%g", $time);
+   if(ack_from_dut != 0) begin
+      $display("Test Failed: write_single_byte()-%g", $time);
       $finish;
    end
-end
-endtask
-
-task test_read_multiple_bytes;
-integer idx;
-begin
-   data_from_dut = 0;
-   reset_dut();
-   send_start();
-   send_address_and_mode({dut_address, READ});   
-   get_ack();
-   get_data_byte();
-   if(data_from_dut != dut_buffer_init) begin
-      $display("Test Failed: read_multiple_bytes()-%g", $time);
-      $finish;
-   end
-   send_ack();
-   get_data_byte();
-   if(data_from_dut != dut_buffer_init) begin
-      $display("Test Failed: read_multiple_bytes()-%g", $time);
-      $finish;
-   end
-   
 end
 endtask
 
@@ -141,11 +144,21 @@ begin
    for(idx=0;idx<8;idx=idx+1) begin
       @(posedge clock);
       SCL_out = 1;
-      @(negedge clock);
-      SCL_out = 0;
       data_from_dut = data_from_dut << 1;
       data_from_dut[0] = SDA;
+      @(negedge clock);
+      SCL_out = 0;
    end
+end
+endtask
+
+task send_stop;
+begin
+   SDA_out = 0;
+   @(posedge clock);
+   SCL_out = 1;
+   @(posedge clock);
+   SDA_out = 1;
 end
 endtask
 
@@ -191,7 +204,18 @@ begin
    end   
 end
 endtask
- 
+
+task send_data_byte;
+input [7:0] data;
+integer x;
+begin
+   for (x=0; x<8; x=x+1) begin
+      send_bit(data[7]);
+      data = data << 1;
+   end   
+end
+endtask
+
 task send_bit;
 input bit_to_send;
 begin
