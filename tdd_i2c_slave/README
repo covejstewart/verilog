@@ -3,4 +3,4 @@ Create an i2c slave module using a TDD approach.
 Run the DUT faster than the Test Bench clock.  Also, don't use an even divisor of the TB clock. . .make the sides as asynchronous as possible.
 
 Test 1: Check that the SDA and SDL lines are both 1 after the DUT is reset
-Test 2: Verify that the DUT resonds with an ACK when addressed
+Test 2: Verify that the DUT responds with an ACK when addressed
